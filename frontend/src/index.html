@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>React</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    th, td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+    }
+    tr:nth-child(even) {
+        background-color: #f2f2f2;
+    }
+    input[type=text] {
+        width: 100%;
+        padding: 8px;
+        margin-top: 10px;
+        margin-bottom: 10px;
+        box-sizing: border-box;
+    }
+    .sort-icon {
+        vertical-align: middle;
+        margin-left: 5px;
+    }
+</style>
+</head>
+<body>
+
+<h2>Customer Data</h2>
+
+<input type="text" id="searchInput" onkeyup="search()" placeholder="Search by name or location..">
+
+<table id="customerTable">
+    <thead>
+        <tr>
+            <th onclick="sortData('name')">Name <span id="nameSortIcon" class="sort-icon">&#x25B2;</span></th>
+            <th onclick="sortData('location')">Location <span id="locationSortIcon" class="sort-icon">&#x25B2;</span></th>
+            <th onclick="sortData('date')">Date <span id="dateSortIcon" class="sort-icon">&#x25B2;</span></th>
+            <th onclick="sortData('time')">Time <span id="timeSortIcon" class="sort-icon">&#x25B2;</span></th>
+            <th>Age</th>
+            <th>Phone</th>
+        </tr>
+    </thead>
+    <tbody>
+        <!-- Table data will be dynamically populated here -->
+    </tbody>
+</table>
+
+<div id="pagination"></div>
+
+<script>
+    // Sample data
+    let data = [
+        { name: 'John Doe', location: 'New York', age: 30, phone: '1234567890', created_at: '2024-03-01T12:00:00' },
+        { name: 'Jane Smith', location: 'Los Angeles', age: 25, phone: '9876543210', created_at: '2024-03-02T09:30:00' },
+        { name: 'John Doe', location: 'New York',age: 30, phone: '764323648',  created_at: '2024-03-01T12:00:00' },
+        { name: 'Jane Smith', location: 'hyd',age: 30, phone: '1234567890', created_at: '2024-03-01T12:00:00'  },
+        { name: 'Ashu', location: 'Los Angeles',age: 30, phone: '8746723427', created_at: '2024-03-02T09:30:00'  },
+        { name: 'Asha', location: 'us',age: 38, phone: '1234567890', created_at: '2024-03-02T09:30:00' },
+        { name: 'jacky', location: 'uk',age: 30, phone: '56745327597', created_at: '2024-03-02T09:30:00'  },
+        { name: 'nithin', location: 'rc', age: 36, phone: '84346874654', created_at: '2024-03-02T09:30:00' },
+        { name: 'navya', location: 'mumbai',age: 35, phone: '1554861554', created_at: '2024-03-02T09:30:00'  },
+        { name: 'pooja', location: 'delhi',age: 33, phone: '456454878',  created_at: '2024-03-02T09:30:00' },
+        { name: 'Smith', location: 'hyd',age: 30, phone: '8976554789', created_at: '2024-03-02T09:30:00' },
+        { name: 'Jane', location: 'AP',age: 30, phone: '985698623',  created_at: '2024-03-01T12:00:00' },
+        { name: 'Sweety', location: 'pune',age: 30, phone: '897654678756', created_at: '2024-03-01T12:00:00'  },
+        { name: 'mithu', location: 'Panuduchery',age: 35, phone: '894534897984', created_at: '2024-03-02T09:30:00'  },
+        { name: 'Jothi', location: 'Los Angeles',age: 38, phone: '1234567890',created_at: '2024-03-01T12:00:00'  },
+        { name: 'kanchana', location: 'chennai',age: 38, phone: '8946548975616',created_at: '2024-03-01T12:00:00'   },
+        { name: 'Jyothi', location: 'china',age: 38, phone: '89449861', created_at: '2024-03-02T09:30:00'  },
+        { name: 'Janu', location: 'Lakhyadeep', age: 32, phone: '8945198765', created_at: '2024-03-01T12:00:00' },
+        { name: 'trisah', location: 'Los Angeles',age: 31, phone: '8945649678',  created_at: '2024-03-01T12:00:00' },
+        { name: 'mina', location: 'asia', age: 30, phone: '435498663', created_at: '2024-03-02T09:30:00' },
+        { name: 'manu', location: 'Los Angeles',age: 30, phone: '9454987',  created_at: '2024-03-02T09:30:00'},
+        { name: 'kanchi', location: 'lundon',age: 30, phone: '845319687',   created_at: '2024-03-01T12:00:00'},
+        { name: 'gani', location: 'Los Angeles',age: 30, phone: '65448964', created_at: '2024-03-01T12:00:00'  },
+        { name: 'kangana', location: 'hyd',age: 30, phone: '787649678974', created_at: '2024-03-02T09:30:00' },
+        { name: 'ganga', location: 'losangeles', age: 30, phone: '1234567890', created_at: '2024-03-01T12:00:00'},
+        { name: 'Smithy', location: 'Los Angeles', age: 30, phone: '1234567890',created_at: '2024-03-01T12:00:00' },
+        { name: 'Jane rose', location: 'uk',age: 36, phone: '765178456132', created_at: '2024-03-02T09:30:00'  },
+        { name: 'sandya', location: 'America', age:38, phone: '1234567890',created_at: '2024-03-02T09:30:00'  },
+        { name: 'laxmi', location: 'Hyd',age: 30, phone: '4216878945321',   created_at: '2024-03-01T12:00:00'},
+        { name: 'ajay', location: 'us',age: 38, phone: '1234567890', created_at: '2024-03-01T12:00:00' },
+        { name: 'John Doe', location: 'New York', age: 30, phone: '1234567890', created_at: '2024-03-01T12:00:00' },
+        { name: 'Jane Smith', location: 'Los Angeles', age: 25, phone: '9876543210', created_at: '2024-03-02T09:30:00' },
+        { name: 'John Doe', location: 'New York',age: 30, phone: '764323648',  created_at: '2024-03-01T12:00:00' },
+        { name: 'Jane Smith', location: 'hyd',age: 30, phone: '1234567890', created_at: '2024-03-01T12:00:00'  },
+        { name: 'Ashu', location: 'Los Angeles',age: 30, phone: '8746723427', created_at: '2024-03-02T09:30:00'  },
+        { name: 'Asha', location: 'us',age: 38, phone: '1234567890', created_at: '2024-03-02T09:30:00' },
+        { name: 'jacky', location: 'uk',age: 30, phone: '56745327597', created_at: '2024-03-02T09:30:00'  },
+        { name: 'nithin', location: 'rc', age: 36, phone: '84346874654', created_at: '2024-03-02T09:30:00' },
+        { name: 'navya', location: 'mumbai',age: 35, phone: '1554861554', created_at: '2024-03-02T09:30:00'  },
+        { name: 'pooja', location: 'delhi',age: 33, phone: '456454878',  created_at: '2024-03-02T09:30:00' },
+        { name: 'Smith', location: 'hyd',age: 30, phone: '8976554789', created_at: '2024-03-02T09:30:00' },
+        { name: 'Jane', location: 'AP',age: 30, phone: '985698623',  created_at: '2024-03-01T12:00:00' },
+        { name: 'Sweety', location: 'pune',age: 30, phone: '897654678756', created_at: '2024-03-01T12:00:00'  },
+        { name: 'mithu', location: 'Panuduchery',age: 35, phone: '894534897984', created_at: '2024-03-02T09:30:00'  },
+        { name: 'Jothi', location: 'Los Angeles',age: 38, phone: '1234567890',created_at: '2024-03-01T12:00:00'  },
+        { name: 'kanchana', location: 'chennai',age: 38, phone: '8946548975616',created_at: '2024-03-01T12:00:00'   },
+        { name: 'Jyothi', location: 'china',age: 38, phone: '89449861', created_at: '2024-03-02T09:30:00'  },
+        { name: 'Janu', location: 'Lakhyadeep', age: 32, phone: '8945198765', created_at: '2024-03-01T12:00:00' },
+        { name: 'trisah', location: 'Los Angeles',age: 31, phone: '8945649678',  created_at: '2024-03-01T12:00:00' },
+        
+    ];
+
+    const tableBody = document.querySelector('#customerTable tbody');
+    const paginationDiv = document.querySelector('#pagination');
+    const pageSize = 20;
+    let currentPage = 1;
+    let sortColumn = null;
+    let sortDirection = 'asc';
+
+    function displayData(dataArray) {
+        const start = (currentPage - 1) * pageSize;
+        const end = start + pageSize;
+        const paginatedData = dataArray.slice(start, end);
+
+        tableBody.innerHTML = '';
+
+        paginatedData.forEach(item => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${item.name}</td>
+                <td>${item.location}</td>
+                <td>${new Date(item.created_at).toLocaleDateString()}</td>
+                <td>${new Date(item.created_at).toLocaleTimeString()}</td>
+                <td>${item.age}</td>
+                <td>${item.phone}</td>
+            `;
+            tableBody.appendChild(row);
+        });
+    }
+
+    function displayPagination(totalPages) {
+        paginationDiv.innerHTML = '';
+
+        for (let i = 1; i <= totalPages; i++) {
+            const button = document.createElement('button');
+            button.textContent = i;
+            button.addEventListener('click', () => {
+                currentPage = i;
+                displayData(data);
+            });
+            paginationDiv.appendChild(button);
+        }
+    }
+
+    function search() {
+        const searchText = document.getElementById('searchInput').value.toLowerCase();
+        const filteredData = data.filter(item =>
+            item.name.toLowerCase().includes(searchText) ||
+            item.location.toLowerCase().includes(searchText)
+        );
+
+        displayData(filteredData);
+        displayPagination(Math.ceil(filteredData.length / pageSize));
+    }
+
+    function sortData(column) {
+        if (sortColumn === column) {
+            sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+            sortColumn = column;
+            sortDirection = 'asc';
+        }
+
+        // Toggle sort icon
+        resetSortIcons();
+        const sortIcon = document.getElementById(`${column}SortIcon`);
+        sortIcon.innerHTML = sortDirection === 'asc' ? '&#x25B2;' : '&#x25BC;';
+
+        data.sort((a, b) => {
+            if (column === 'date') {
+                const dateA = new Date(a.created_at);
+                const dateB = new Date(b.created_at);
+                return sortDirection === 'asc' ? dateA - dateB : dateB - dateA;
+            } else if (column === 'time') {
+                const timeA = new Date(a.created_at).getTime();
+                const timeB = new Date(b.created_at).getTime();
+                return sortDirection === 'asc' ? timeA - timeB : timeB - timeA;
+            } else {
+                const valueA = a[column].toUpperCase();
+                const valueB = b[column].toUpperCase();
+                let comparison = 0;
+                if (valueA > valueB) {
+                    comparison = 1;
+                } else if (valueA < valueB) {
+                    comparison = -1;
+                }
+                return sortDirection === 'desc' ? comparison * -1 : comparison;
+            }
+        });
+
+        displayData(data);
+        displayPagination(Math.ceil(data.length / pageSize));
+    }
+
+    function resetSortIcons() {
+        document.querySelectorAll('.sort-icon').forEach(icon => {
+            icon.innerHTML = '';
+        });
+    }
+
+    // Initial display
+    displayData(data);
+    displayPagination(Math.ceil(data.length / pageSize));
+</script>
+
+</body>
+</html>
